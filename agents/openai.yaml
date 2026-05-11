@@ -1,0 +1,4 @@
+interface:
+  display_name: "better-ps-cmd-skill"
+  short_description: "Run Windows commands from WSL with fewer shell bugs"
+  default_prompt: "Use $better-ps-cmd-skill to run Windows-side build, test, git, gh, and shell commands from WSL without PowerShell or cmd quoting drift."
