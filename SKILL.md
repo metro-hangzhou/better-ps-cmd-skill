@@ -1,6 +1,6 @@
 ---
 name: better-ps-cmd-skill
-description: Use when Codex runs Windows-side commands from WSL or Codex CLI and PowerShell/cmd quoting, path conversion, newline, encoding, or command translation errors are likely. Prefer this skill for Windows-hosted projects under /mnt/drive-letter paths, npm/node/cargo/python commands that must run with Windows tooling, GitHub/CI probes launched from WSL into Windows, and any previous failure involving powershell.exe -Command, cmd.exe /c, bare bash.exe, backslash paths, nested quotes, or WSL-to-Windows argument drift. It provides a better default by running the Git for Windows bash.exe explicitly and failing fast if that executable cannot be used.
+description: Use when Codex runs Windows-side commands from WSL or Codex CLI and PowerShell/cmd quoting, path conversion, newline, encoding, or command translation errors are likely. Prefer this skill for Windows-hosted projects under /mnt/drive-letter paths, npm/node/cargo/python commands that must run with Windows tooling, GitHub/CI probes launched from WSL into Windows, creating or editing Windows scripts (.cmd, .bat, .ps1) that need bash/Git Bash commands, and any previous failure involving powershell.exe -Command, cmd.exe /c, bare bash.exe, backslash paths, nested quotes, or WSL-to-Windows argument drift. It provides a better default by running the Git for Windows bash.exe explicitly and failing fast if that executable cannot be used.
 ---
 
 # better-ps-cmd-skill
@@ -50,10 +50,33 @@ Use shell operators inside the Git Bash command string only after the `cd`:
 - Keep the WSL-to-Windows boundary shallow: WSL bash -> Git for Windows `bash.exe` -> target tool.
 - Do not use bare `bash.exe`; it is ambiguous and may be the WSL launcher.
 - Do not use `git-bash.exe` for non-interactive command execution by default; use Git for Windows `bin/bash.exe -lc`.
-- Do not use PowerShell/cmd as a Git Bash launcher by default.
+- Do not use PowerShell/cmd as a Git Bash launcher from WSL by default. Exception: when authoring `.cmd`, `.bat`, or `.ps1` scripts, those scripts must explicitly call Git for Windows `bash.exe` before any bash/Git Bash command.
 - Do not use Windows backslash paths as the project path inside Git Bash; use `/c/projects/app`.
 - Avoid mixing `/mnt/c/...`, `/c/...`, and `C:\...` for the same working directory.
 - Put all real work (`git`, `gh`, `npm`, builds, tests) inside the Git Bash `-lc` command.
+
+## Windows Script Authoring
+
+When creating or editing `.cmd`, `.bat`, or `.ps1` files, remember that Windows script interpreters do not understand bash syntax, Git Bash paths, or Unix tools by themselves. Prefix bash/Git Bash commands with Git for Windows `bash.exe`.
+
+For `.cmd` or `.bat`:
+
+```bat
+@echo off
+set "GIT_BASH=C:\Program Files\Git\bin\bash.exe"
+"%GIT_BASH%" -lc "cd /c/projects/my-app && git status --short && npm run test"
+exit /b %ERRORLEVEL%
+```
+
+For `.ps1`:
+
+```powershell
+$GitBash = 'C:\Program Files\Git\bin\bash.exe'
+& $GitBash -lc 'cd /c/projects/my-app && git status --short && npm run test'
+exit $LASTEXITCODE
+```
+
+Keep all Unix-style commands, shell operators, and Git Bash paths inside the `-lc` string. Keep Windows script logic limited to choosing arguments, calling Git Bash, and propagating the exit code.
 
 ## Failure Handling
 
