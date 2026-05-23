@@ -1,11 +1,13 @@
 ---
 name: better-ps-cmd-skill
-description: Use when Codex runs Windows-side commands from WSL or Codex CLI and PowerShell/cmd quoting, path conversion, newline, encoding, or command translation errors are likely, and when creating or editing Windows scripts (.cmd, .bat, .ps1). Prefer this skill for Windows-hosted projects under /mnt/drive-letter paths, npm/node/cargo/python commands that must run with Windows tooling, GitHub/CI probes launched from WSL into Windows, Windows script authoring for ordinary users, and any previous failure involving powershell.exe -Command, cmd.exe /c, bare bash.exe, backslash paths, nested quotes, or WSL-to-Windows argument drift. It uses Git for Windows bash.exe only for Codex's temporary command execution, while Windows script outputs should be native cmd/PowerShell and avoid Git Bash dependencies.
+description: "Use when: WSL 运行 Windows 命令、WSL Windows 交叉命令、Git Bash bash.exe 路径问题、powershell.exe 引号转义、cmd.exe 换行符、WSL /mnt/drive-letter 路径转换、.ps1/.bat/.cmd Windows 脚本编写；or when: Codex runs Windows-side commands from WSL; or when: bare bash.exe path/quoting/nesting errors; or when: writing portable Windows scripts (.cmd, .bat, .ps1). Works across agent runtimes: Codex, Claude Code, Cursor, OpenClaw, or any bash-capable agent. Prefers Git for Windows bash.exe over powershell.exe or bare bash.exe for WSL-to-Windows bridges.
 ---
 
 # better-ps-cmd-skill
 
 ## Core Rule
+
+> **适用环境**：适用于任意支持 bash 调用的 agent runtime（Codex / Claude Code / Cursor / OpenClaw 等）。只要能跑 bash，就能用 Git for Windows bash.exe 做 WSL ↔ Windows 桥接。
 
 For Windows-side work launched from WSL, run the `bash.exe` that belongs to Git for Windows. Do not use bare `bash.exe`, because it may resolve to the Windows WSL launcher and run Linux bash instead of Git Bash.
 
